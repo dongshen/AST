@@ -9,17 +9,23 @@ import java.io.IOException;
 import org.apache.log4j.Logger;
 
 public class FileUtil {
+	
 
-	static Logger logger = Logger.getLogger(FileUtilTest.class);
+	private static final Logger LOG = Logger.getLogger(FileUtil.class);
+	
+	private static final String DEMO_FILE_PATH = "demofile";
 
 	public static char[] convertFileToArray(String javaFilePath) throws IOException {
-		File f = new File(javaFilePath);
-		logger.debug(f.getCanonicalFile());
+		String fileName = DEMO_FILE_PATH + File.separator + javaFilePath;
+		
+		File f = new File(fileName);
+		LOG.debug(f.getCanonicalFile());
+		
 		byte[] input = null;
 		BufferedInputStream bufferedInputStream = null;
 		try {
 			bufferedInputStream = new BufferedInputStream(new FileInputStream(
-					javaFilePath));
+					fileName));
 			input = new byte[bufferedInputStream.available()];
 			bufferedInputStream.read(input);
 			bufferedInputStream.close();
