@@ -20,7 +20,7 @@ public class DemoVisitorTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		CompilationUnit comp = JdtAstUtil.getCompilationUnit(output);
+ 		CompilationUnit comp = JdtAstUtil.getCompilationUnit(output);
 		DemoVisitor visitor = new DemoVisitor();
 		comp.accept(visitor);
 	}
