@@ -1,6 +1,7 @@
 package com.ast.parse;
 
 import java.io.IOException;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -17,6 +18,24 @@ public class ParserTest {
 			output = FileUtil.convertFileToArray(input);
 
 			Parser.parseDemoVisitor(output);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@Test
+	public void testParseDemoVisitor_filefolder() {
+
+		String output = null;
+		try {
+			List<String> lists = FileUtil.getFilesInDir();
+			for (String input : lists) {
+				output = FileUtil.readFileToString(input);
+
+				Parser.parseDemoVisitor(output);
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
