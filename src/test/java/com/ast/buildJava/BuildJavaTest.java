@@ -34,6 +34,9 @@ public class BuildJavaTest {
 
 	@Test
 	public void testBuildJavaSimple() {
+		/*
+		 * class Program { static void main(){ i=10; } }
+		 */
 		// 程序构成一个CompilationUnit
 		AST ast = AST.newAST(AST.JLS3);
 		CompilationUnit cu = ast.newCompilationUnit();
