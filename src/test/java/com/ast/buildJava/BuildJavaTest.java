@@ -38,7 +38,7 @@ public class BuildJavaTest {
 		 * class Program { static void main(){ i=10; } }
 		 */
 		// 程序构成一个CompilationUnit
-		AST ast = AST.newAST(AST.JLS3);
+		AST ast = AST.newAST(AST.JLS4);
 		CompilationUnit cu = ast.newCompilationUnit();
 
 		// 在CompilationUnit实例中包含一个TypeDeclaration，表示程序中的类Program
@@ -83,7 +83,7 @@ public class BuildJavaTest {
 
 	@Test
 	public void testBuildJava() {
-		AST ast = AST.newAST(AST.JLS3);
+		AST ast = AST.newAST(AST.JLS4);
 		CompilationUnit compilationUnit = ast.newCompilationUnit();
 
 		// 创建类

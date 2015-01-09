@@ -14,7 +14,7 @@ public class JdtAstUtil {
 	public static CompilationUnit getCompilationUnit(char[] input) {
 
 		// Java编程规范（Java Language Specification，简写为JLS），此参数为常量，例如AST.JLS3
-		ASTParser astParser = ASTParser.newParser(AST.JLS3);
+		ASTParser astParser = ASTParser.newParser(AST.JLS4);
 		
 		// 方法setSource()针对不同形式的源代码作为参数而进行了重载，主要分类为字符数组形式（char[]）和JavaModel形式（ICompilationUnit、IClassFile等）。
 		astParser.setSource(input);
