@@ -8,13 +8,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
+import sdong.coverity.ast.CoverityAst;
 import sdong.coverity.ast.Loc;
-import sdong.coverity.ast.definitions.CoverityDefinition;
-import sdong.coverity.ast.definitions.CoverityDefinition.DefinitionType;
+import sdong.coverity.ast.CoverityAst.DefinitionType;
 
-public class CoverityASTDefinitionsParse {
+public class CoverityAstParse {
 
-	private static final Logger logger = LoggerFactory.getLogger(CoverityASTDefinitionsParse.class);
+	private static final Logger logger = LoggerFactory.getLogger(CoverityAstParse.class);
 
 	private static final String COMMENT_START = "/*";
 	private static final String COMMENT_END = "*/";
@@ -25,13 +25,13 @@ public class CoverityASTDefinitionsParse {
 	private static final String PREFIX = " \\*   ";
 	private static final String UNKONW = "<unknown>";
 
-	public List<CoverityDefinition> parse(List<String> tuContent) throws SdongException {
-		List<CoverityDefinition> definitionList = new ArrayList<CoverityDefinition>();
+	public List<CoverityAst> parse(List<String> tuContent) throws SdongException {
+		List<CoverityAst> definitionList = new ArrayList<CoverityAst>();
 		String line;
 		boolean first = true;
 		boolean start = true;
 		boolean end = false;
-		CoverityDefinition definition = null;
+		CoverityAst definition = null;
 		List<String> content = null;
 
 		try {
@@ -43,7 +43,7 @@ public class CoverityASTDefinitionsParse {
 					// not the first one, need add to list
 					if (first == false) {
 						if (definition.getFileName() != null) {
-							definition.setContent(content);
+							definition.setContentForDefinition(content);
 							definitionList.add(definition);
 						}
 					}
@@ -51,7 +51,7 @@ public class CoverityASTDefinitionsParse {
 						first = false;
 					}
 
-					definition = new CoverityDefinition();
+					definition = new CoverityAst();
 					content = new ArrayList<String>();
 
 					continue;
@@ -79,7 +79,7 @@ public class CoverityASTDefinitionsParse {
 			}
 			if (definition != null) {
 				if (definition.getFileName() != null) {
-					definition.setContent(content);
+					definition.setContentForDefinition(content);
 					definitionList.add(definition);
 				}
 			}
@@ -91,7 +91,7 @@ public class CoverityASTDefinitionsParse {
 		return definitionList;
 	}
 
-	public void setDeclaredAt(String line, CoverityDefinition definition) throws SdongException {
+	public void setDeclaredAt(String line, CoverityAst definition) throws SdongException {
 		try {
 			line = line.replaceAll(PREFIX, "");
 			if (line.equals(UNKONW)) {
@@ -150,7 +150,7 @@ public class CoverityASTDefinitionsParse {
 		}
 	}
 
-	public void setMatchingType(String line, CoverityDefinition definition) throws SdongException {
+	public void setMatchingType(String line, CoverityAst definition) throws SdongException {
 		try {
 			line = line.replaceAll(REPLACE_MATCHING, "");
 			String[] types = line.split(":");

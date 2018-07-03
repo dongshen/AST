@@ -1,10 +1,10 @@
-package sdong.coverity.ast.definitions;
+package sdong.coverity.ast;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CoverityDefinition {
+public class CoverityAst {
 
 	String fileName;
 	DefinitionType type;
@@ -15,7 +15,8 @@ public class CoverityDefinition {
 	int toLine;
 	int toColumn;
 
-	List<String> content;
+	List<String> contentForDefinition;
+	List<String> contentForDebug;
 
 	public String getClassName() {
 		return className;
@@ -73,12 +74,20 @@ public class CoverityDefinition {
 		this.type = type;
 	}
 
-	public List<String> getContent() {
-		return content;
+	public List<String> getContentForDefinition() {
+		return contentForDefinition;
 	}
 
-	public void setContent(List<String> content) {
-		this.content = content;
+	public void setContentForDefinition(List<String> content) {
+		this.contentForDefinition = content;
+	}
+
+	public List<String> getContentForDebug() {
+		return contentForDebug;
+	}
+
+	public void setContentForDebug(List<String> contentForDebug) {
+		this.contentForDebug = contentForDebug;
 	}
 
 	public enum DefinitionType {

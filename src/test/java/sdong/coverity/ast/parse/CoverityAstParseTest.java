@@ -13,59 +13,99 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
-import sdong.coverity.ast.definitions.CoverityDefinition;
-import sdong.coverity.ast.definitions.CoverityDefinition.DefinitionType;
+import sdong.coverity.ast.CoverityAst;
+import sdong.coverity.ast.CoverityAst.DefinitionType;
 
-public class CoverityASTDefinitionsParseTest {
+public class CoverityAstParseTest {
 
-	private static final Logger logger = LoggerFactory.getLogger(CoverityASTDefinitionsParseTest.class);
+	private static final Logger logger = LoggerFactory.getLogger(CoverityAstParseTest.class);
 
 	@Test
-	public void testParse() {
-		String fileName = "input/coverityAST/270";
+	public void testParseForDefinition() {
+		String fileName = "input/coverityAST/BenchmarkTest00001_definition_update";
 		try {
-			List<String> content = readASTDefinitionFile(fileName);
-			CoverityASTDefinitionsParse parse = new CoverityASTDefinitionsParse();
-			List<String> contentList = parse.removeDEFINED_IN_TU(content);
+			List<String> contentList = readASTDefinitionFile(fileName);
+			CoverityAstParse parse = new CoverityAstParse();
 
-			List<CoverityDefinition> deflist = parse.parse(contentList);
+			List<CoverityAst> deflist = parse.parse(contentList);
 
 			//check total
 			assertEquals(6, deflist.size());
 			
 			//check first one
-			CoverityDefinition def =  deflist.get(0);
+			CoverityAst def =  deflist.get(0);
 			assertEquals("D:/git/benchmark/src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00001.java", def.getFileName());
-			assertEquals(CoverityDefinition.DefinitionType.CLASS, def.getType());
+			assertEquals(CoverityAst.DefinitionType.CLASS, def.getType());
 			assertEquals("org.owasp.benchmark.testcode.BenchmarkTest00001", def.getClassName());
 			assertEquals(30, def.getFromLine());
 			assertEquals(14, def.getFromColumn());
 			assertEquals(30, def.getToLine());
 			assertEquals(31, def.getToColumn());
-			assertEquals(8, def.getContent().size());
+			assertEquals(8, def.getContentForDefinition().size());
 			
 			//check last one
 			def =  deflist.get(deflist.size()-1);
 			assertEquals("D:/git/benchmark/src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00001.java", def.getFileName());
-			assertEquals(CoverityDefinition.DefinitionType.FUNCTION, def.getType());
+			assertEquals(CoverityAst.DefinitionType.FUNCTION, def.getType());
 			assertEquals("org.owasp.benchmark.testcode.BenchmarkTest00001.doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)void", def.getClassName());
 			assertEquals(40, def.getFromLine());
 			assertEquals(14, def.getFromColumn());
 			assertEquals(40, def.getToLine());
 			assertEquals(114, def.getToColumn());
-			assertEquals(36, def.getContent().size());
+			assertEquals(36, def.getContentForDefinition().size());
 			
 			//check global
 			def =  deflist.get(3);
 			assertEquals("D:/git/benchmark/src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00001.java", def.getFileName());
-			assertEquals(CoverityDefinition.DefinitionType.GLOBAL, def.getType());
+			assertEquals(CoverityAst.DefinitionType.GLOBAL, def.getType());
 			assertEquals("org.owasp.benchmark.testcode.BenchmarkTest00001.serialVersionUID", def.getClassName());
 			assertEquals(32, def.getFromLine());
 			assertEquals(28, def.getFromColumn());
 			assertEquals(32, def.getToLine());
 			assertEquals(43, def.getToColumn());
-			assertEquals(1, def.getContent().size());
+			assertEquals(1, def.getContentForDefinition().size());
 			
+
+		} catch (SdongException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+	
+	@Test
+	public void testParseForDebug() {
+		String fileName = "input/coverityAST/BenchmarkTest00001_debug_update";
+		try {
+			List<String> contentList = readASTDefinitionFile(fileName);
+			CoverityAstParse parse = new CoverityAstParse();
+
+			List<CoverityAst> deflist = parse.parse(contentList);
+
+			//check total
+			assertEquals(4, deflist.size());
+			
+			//check first one
+			CoverityAst def =  deflist.get(0);
+			assertEquals("D:/git/benchmark/src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00001.java", def.getFileName());
+			assertEquals(CoverityAst.DefinitionType.FUNCTION, def.getType());
+			assertEquals("org.owasp.benchmark.testcode.BenchmarkTest00001.<clinit>()void", def.getClassName());
+			assertEquals(30, def.getFromLine());
+			assertEquals(14, def.getFromColumn());
+			assertEquals(30, def.getToLine());
+			assertEquals(31, def.getToColumn());
+			assertEquals(91, def.getContentForDefinition().size());
+			
+			//check last one
+			def =  deflist.get(deflist.size()-1);
+			assertEquals("D:/git/benchmark/src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00001.java", def.getFileName());
+			assertEquals(CoverityAst.DefinitionType.FUNCTION, def.getType());
+			assertEquals("org.owasp.benchmark.testcode.BenchmarkTest00001.doPost(javax.servlet.http.HttpServletRequest, javax.servlet.http.HttpServletResponse)void", def.getClassName());
+			assertEquals(40, def.getFromLine());
+			assertEquals(14, def.getFromColumn());
+			assertEquals(40, def.getToLine());
+			assertEquals(114, def.getToColumn());
+			assertEquals(2897, def.getContentForDefinition().size());			
 
 		} catch (SdongException e) {
 			// TODO Auto-generated catch block
@@ -76,9 +116,9 @@ public class CoverityASTDefinitionsParseTest {
 
 	@Test
 	public void testSetMatchingType() {
-		CoverityASTDefinitionsParse parse = new CoverityASTDefinitionsParse();
+		CoverityAstParse parse = new CoverityAstParse();
 		String line = " * Matching class: java.security.Provider[]";
-		CoverityDefinition definition = new CoverityDefinition();
+		CoverityAst definition = new CoverityAst();
 		try {
 			parse.setMatchingType(line, definition);
 
@@ -92,9 +132,9 @@ public class CoverityASTDefinitionsParseTest {
 
 	@Test
 	public void testSetDeclaredAt() {
-		CoverityASTDefinitionsParse parse = new CoverityASTDefinitionsParse();
+		CoverityAstParse parse = new CoverityAstParse();
 		String line = " *   <unknown>";
-		CoverityDefinition definition = new CoverityDefinition();
+		CoverityAst definition = new CoverityAst();
 		try {
 			parse.setDeclaredAt(line, definition);
 
@@ -121,12 +161,24 @@ public class CoverityASTDefinitionsParseTest {
 
 	@Test
 	public void testRemoveDEFINED_IN_TU() {
-		String fileName = "input/coverityAST/270";
+		String fileName = "input/coverityAST/BenchmarkTest00001_definition";
 		List<String> astContent = readASTDefinitionFile(fileName);
-		assertEquals(114, astContent.size());
-		CoverityASTDefinitionsParse parse = new CoverityASTDefinitionsParse();
+		int total_lines = 114;
+		assertEquals(total_lines, astContent.size());
+		CoverityAstParse parse = new CoverityAstParse();
 		List<String> astContent_without_DEFINED_IN_TU = parse.removeDEFINED_IN_TU(astContent);
-		assertEquals(114 - 8, astContent_without_DEFINED_IN_TU.size());
+		assertEquals(total_lines - 8, astContent_without_DEFINED_IN_TU.size());
+	}
+	
+	@Test
+	public void testRemoveDEFINED_IN_TU_for_debug() {
+		String fileName = "input/coverityAST/BenchmarkTest00001_debug";
+		List<String> astContent = readASTDefinitionFile(fileName);
+		int total_lines = 3665;
+		assertEquals(total_lines, astContent.size());
+		CoverityAstParse parse = new CoverityAstParse();
+		List<String> astContent_without_DEFINED_IN_TU = parse.removeDEFINED_IN_TU(astContent);
+		assertEquals(total_lines - 4, astContent_without_DEFINED_IN_TU.size());
 	}
 
 	private List<String> readASTDefinitionFile(String fileName) {
