@@ -53,8 +53,19 @@ public class CoverityASTDefinitionsParseTest {
 			assertEquals(14, def.getFromColumn());
 			assertEquals(40, def.getToLine());
 			assertEquals(114, def.getToColumn());
-			
 			assertEquals(36, def.getContent().size());
+			
+			//check global
+			def =  deflist.get(3);
+			assertEquals("D:/git/benchmark/src/main/java/org/owasp/benchmark/testcode/BenchmarkTest00001.java", def.getFileName());
+			assertEquals(CoverityDefinition.DefinitionType.GLOBAL, def.getType());
+			assertEquals("org.owasp.benchmark.testcode.BenchmarkTest00001.serialVersionUID", def.getClassName());
+			assertEquals(32, def.getFromLine());
+			assertEquals(28, def.getFromColumn());
+			assertEquals(32, def.getToLine());
+			assertEquals(43, def.getToColumn());
+			assertEquals(1, def.getContent().size());
+			
 
 		} catch (SdongException e) {
 			// TODO Auto-generated catch block
