@@ -1,16 +1,18 @@
 package sdong.coverity.ast.parse;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
 import sdong.coverity.ast.CoverityAst;
-import sdong.coverity.ast.Loc;
 import sdong.coverity.ast.CoverityAst.DefinitionType;
+import sdong.coverity.ast.Loc;
 
 public class CoverityAstParse {
 
@@ -19,10 +21,10 @@ public class CoverityAstParse {
 	private static final String COMMENT_START = "/*";
 	private static final String COMMENT_END = "*/";
 	private static final String DEFINED_IN_TU = " * defined in TU ";
+	private static final String DEFINED_IN_TU_WITH_RON = " with row ";
 	private static final String MATCHING = " * Matching ";
-	private static final String REPLACE_MATCHING = " \\* Matching ";
 	private static final String DECLARED_AT = " * declared at:";
-	private static final String PREFIX = " \\*   ";
+	private static final String PREFIX = " *   ";
 	private static final String UNKONW = "<unknown>";
 
 	public List<CoverityAst> parse(List<String> tuContent) throws SdongException {
@@ -93,7 +95,10 @@ public class CoverityAstParse {
 
 	public void setDeclaredAt(String line, CoverityAst definition) throws SdongException {
 		try {
-			line = line.replaceAll(PREFIX, "");
+			if (line.startsWith(PREFIX)) {
+				line = line.substring(PREFIX.length()).trim();
+			}
+			
 			if (line.equals(UNKONW)) {
 				return;
 			}
@@ -152,7 +157,7 @@ public class CoverityAstParse {
 
 	public void setMatchingType(String line, CoverityAst definition) throws SdongException {
 		try {
-			line = line.replaceAll(REPLACE_MATCHING, "");
+			line = line.substring(line.indexOf(MATCHING) + MATCHING.length());
 			String[] types = line.split(":");
 			DefinitionType type = DefinitionType.get(types[0].trim());
 			definition.setType(type);
@@ -163,7 +168,7 @@ public class CoverityAstParse {
 		}
 	}
 
-	public List<String> removeDEFINED_IN_TU(List<String> tuContent) {
+	public static List<String> removeDEFINED_IN_TU(List<String> tuContent) {
 		String line;
 		for (Iterator<String> iter = tuContent.listIterator(); iter.hasNext();) {
 			line = iter.next();
@@ -173,6 +178,54 @@ public class CoverityAstParse {
 		}
 
 		return tuContent;
+	}
+
+	public static Map<Integer, List<String>> splitTUAst(List<String> astContent) throws SdongException {
+		Map<Integer, List<String>> tuList = new HashMap<Integer, List<String>>();
+		List<String> tu = null;
+		int tuNum = 0;
+		int tuStart = 0;
+		int tuEnd = 0;
+
+		try {
+
+			for (String line : astContent) {
+				if (line.startsWith(COMMENT_START)) {
+					if (tu == null) {
+						tu = new ArrayList<String>();
+					} else {
+						if (tuList.containsKey(tuNum)) {
+							tuList.get(tuNum).addAll(tu);
+						} else {
+							tuList.put(tuNum, tu);
+						}
+						tu = new ArrayList<String>();
+					}
+
+				} else if (line.contains(DEFINED_IN_TU)) {
+					tuStart = line.indexOf(DEFINED_IN_TU) + DEFINED_IN_TU.length();
+					tuEnd = line.indexOf(DEFINED_IN_TU_WITH_RON);
+					if (tuEnd == -1) {
+						tuNum = Integer.parseInt(line.substring(tuStart));
+					} else {
+						tuNum = Integer.parseInt(line.substring(tuStart, tuEnd));
+					}
+				}
+				tu.add(line);
+			}
+			if (tu != null) {
+				if (tuList.containsKey(tuNum)) {
+					tuList.get(tuNum).addAll(tu);
+				} else {
+					tuList.put(tuNum, tu);
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e.getMessage());
+		}
+
+		return tuList;
 	}
 
 }
