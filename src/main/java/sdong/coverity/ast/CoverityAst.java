@@ -1,10 +1,16 @@
 package sdong.coverity.ast;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CoverityAst {
+public class CoverityAst implements Serializable, Comparable<CoverityAst> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -1122671580213079468L;
 
 	String fileName;
 	DefinitionType type;
@@ -117,6 +123,18 @@ public class CoverityAst {
 
 		public static DefinitionType get(String type) {
 			return lookup.get(type);
+		}
+
+	}
+
+	// sort from small to big
+	public int compareTo(CoverityAst comp) {
+		if (this.getFromLine() > comp.getFromLine()) {
+			return 1;
+		} else if (this.getFromLine() > comp.getFromLine()) {
+			return 0;
+		} else {
+			return -1;
 		}
 
 	}

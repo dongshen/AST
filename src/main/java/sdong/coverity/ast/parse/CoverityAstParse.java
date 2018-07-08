@@ -1,8 +1,8 @@
 package sdong.coverity.ast.parse;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -20,7 +20,7 @@ public class CoverityAstParse {
 
 	private static final String COMMENT_START = "/*";
 	private static final String COMMENT_END = "*/";
-	private static final String DEFINED_IN_TU = " * defined in TU ";
+	public static final String DEFINED_IN_TU = " * defined in TU ";
 	private static final String DEFINED_IN_TU_WITH_RON = " with row ";
 	private static final String MATCHING = " * Matching ";
 	private static final String DECLARED_AT = " * declared at:";
@@ -90,6 +90,9 @@ public class CoverityAstParse {
 			throw new SdongException(e.getMessage());
 		}
 
+		//sort by line num
+		Collections.sort(definitionList);
+
 		return definitionList;
 	}
 
@@ -98,7 +101,7 @@ public class CoverityAstParse {
 			if (line.startsWith(PREFIX)) {
 				line = line.substring(PREFIX.length()).trim();
 			}
-			
+
 			if (line.equals(UNKONW)) {
 				return;
 			}
@@ -166,18 +169,6 @@ public class CoverityAstParse {
 			logger.error(e.getMessage());
 			throw new SdongException(e.getMessage());
 		}
-	}
-
-	public static List<String> removeDEFINED_IN_TU(List<String> tuContent) {
-		String line;
-		for (Iterator<String> iter = tuContent.listIterator(); iter.hasNext();) {
-			line = iter.next();
-			if (line.contains(DEFINED_IN_TU)) {
-				iter.remove();
-			}
-		}
-
-		return tuContent;
 	}
 
 	public static Map<Integer, List<String>> splitTUAst(List<String> astContent) throws SdongException {
