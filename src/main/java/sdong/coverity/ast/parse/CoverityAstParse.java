@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
+import sdong.common.utils.StringUtil;
 import sdong.coverity.ast.CoverityAst;
 import sdong.coverity.ast.CoverityAst.DefinitionType;
 import sdong.coverity.ast.Loc;
@@ -90,10 +91,30 @@ public class CoverityAstParse {
 			throw new SdongException(e.getMessage());
 		}
 
-		//sort by line num
+		// sort by line num
 		Collections.sort(definitionList);
 
 		return definitionList;
+	}
+
+	public void parseAstDebug(List<String> tuContent) throws SdongException {
+		try {
+			String line;
+			String checkChar = "";
+			int indented = 0;
+			int preIndented = 0;
+			for (int i = 1; i <= tuContent.size(); i++) {
+				line = tuContent.get(i);
+				indented = StringUtil.checkIndentNum(line, checkChar);
+				if (indented != preIndented) {
+
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e.getMessage());
+		}
+
 	}
 
 	public void setDeclaredAt(String line, CoverityAst definition) throws SdongException {
