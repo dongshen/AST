@@ -1,19 +1,37 @@
 package sdong.coverity.ast.Util;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import sdong.common.exception.SdongException;
 import sdong.coverity.ast.CoverityAst;
-import sdong.coverity.ast.parse.CoverityAstParse;
 
 public class AstUtil {
 
+	private static final Logger logger = LoggerFactory.getLogger(AstUtil.class);
+	
+	public static final String COMMENT_START = "/*";
+	public static final String COMMENT_END = "*/";
+	public static final String DEFINED_IN_TU = " * defined in TU ";
+	private static final String DEFINED_IN_TU_WITH_RON = " with row ";
+	
+
+	public static final String MATCHING = " * Matching ";
+	public static final String DECLARED_AT = " * declared at:";
+	public static final String PREFIX = " *   ";
+	public static final String UNKONW = "<unknown>";
+	
 	public static List<String> removeDEFINED_IN_TU(List<String> tuContent) {
 		String line;
 		for (Iterator<String> iter = tuContent.listIterator(); iter.hasNext();) {
 			line = iter.next();
-			if (line.contains(CoverityAstParse.DEFINED_IN_TU)) {
+			if (line.contains(DEFINED_IN_TU)) {
 				iter.remove();
 			}
 		}
@@ -21,6 +39,54 @@ public class AstUtil {
 		return tuContent;
 	}
 
+	public static Map<Integer, List<String>> splitTUAst(List<String> astContent) throws SdongException {
+		Map<Integer, List<String>> tuList = new HashMap<Integer, List<String>>();
+		List<String> tu = null;
+		int tuNum = 0;
+		int tuStart = 0;
+		int tuEnd = 0;
+
+		try {
+
+			for (String line : astContent) {
+				if (line.startsWith(COMMENT_START)) {
+					if (tu == null) {
+						tu = new ArrayList<String>();
+					} else {
+						if (tuList.containsKey(tuNum)) {
+							tuList.get(tuNum).addAll(tu);
+						} else {
+							tuList.put(tuNum, tu);
+						}
+						tu = new ArrayList<String>();
+					}
+
+				} else if (line.contains(DEFINED_IN_TU)) {
+					tuStart = line.indexOf(DEFINED_IN_TU) + DEFINED_IN_TU.length();
+					tuEnd = line.indexOf(DEFINED_IN_TU_WITH_RON);
+					if (tuEnd == -1) {
+						tuNum = Integer.parseInt(line.substring(tuStart));
+					} else {
+						tuNum = Integer.parseInt(line.substring(tuStart, tuEnd));
+					}
+				}
+				tu.add(line);
+			}
+			if (tu != null) {
+				if (tuList.containsKey(tuNum)) {
+					tuList.get(tuNum).addAll(tu);
+				} else {
+					tuList.put(tuNum, tu);
+				}
+			}
+		} catch (Exception e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e.getMessage());
+		}
+
+		return tuList;
+	}
+	
 	public static List<CoverityAst> getGlobleVariableList(List<CoverityAst> functionList) {
 		List<CoverityAst> globalList = new ArrayList<CoverityAst>();
 		for (CoverityAst fun : functionList) {

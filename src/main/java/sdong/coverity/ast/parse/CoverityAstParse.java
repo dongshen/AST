@@ -2,9 +2,7 @@ package sdong.coverity.ast.parse;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,19 +12,12 @@ import sdong.common.utils.StringUtil;
 import sdong.coverity.ast.CoverityAst;
 import sdong.coverity.ast.CoverityAst.DefinitionType;
 import sdong.coverity.ast.Loc;
+import sdong.coverity.ast.Util.AstUtil;
 
 public class CoverityAstParse {
 
 	private static final Logger logger = LoggerFactory.getLogger(CoverityAstParse.class);
 
-	private static final String COMMENT_START = "/*";
-	private static final String COMMENT_END = "*/";
-	public static final String DEFINED_IN_TU = " * defined in TU ";
-	private static final String DEFINED_IN_TU_WITH_RON = " with row ";
-	private static final String MATCHING = " * Matching ";
-	private static final String DECLARED_AT = " * declared at:";
-	private static final String PREFIX = " *   ";
-	private static final String UNKONW = "<unknown>";
 
 	public List<CoverityAst> parse(List<String> tuContent) throws SdongException {
 		List<CoverityAst> definitionList = new ArrayList<CoverityAst>();
@@ -40,7 +31,7 @@ public class CoverityAstParse {
 		try {
 			for (int i = 1; i <= tuContent.size(); i++) {
 				line = tuContent.get(i - 1);
-				if (line.contains(COMMENT_START)) {
+				if (line.contains(AstUtil.COMMENT_START)) {
 					start = true;
 					end = false;
 					// not the first one, need add to list
@@ -61,16 +52,16 @@ public class CoverityAstParse {
 
 				}
 
-				if (line.contains(COMMENT_END) && definition != null) {
+				if (line.contains(AstUtil.COMMENT_END) && definition != null) {
 					end = true;
 					start = false;
 					continue;
 				}
 
 				if (start == true) {
-					if (line.contains(MATCHING)) {
+					if (line.contains(AstUtil.MATCHING)) {
 						setMatchingType(line, definition);
-					} else if (line.contains(DECLARED_AT)) {
+					} else if (line.contains(AstUtil.DECLARED_AT)) {
 						setDeclaredAt(tuContent.get(i), definition);
 					}
 				}
@@ -101,13 +92,15 @@ public class CoverityAstParse {
 		try {
 			String line;
 			String checkChar = "";
-			int indented = 0;
-			int preIndented = 0;
+			int indented = -1;
+			int preIndented = -1;
 			for (int i = 1; i <= tuContent.size(); i++) {
 				line = tuContent.get(i);
 				indented = StringUtil.checkIndentNum(line, checkChar);
 				if (indented != preIndented) {
-
+					if(indented == 0) {
+						
+					}
 				}
 			}
 		} catch (Exception e) {
@@ -119,11 +112,11 @@ public class CoverityAstParse {
 
 	public void setDeclaredAt(String line, CoverityAst definition) throws SdongException {
 		try {
-			if (line.startsWith(PREFIX)) {
-				line = line.substring(PREFIX.length()).trim();
+			if (line.startsWith(AstUtil.PREFIX)) {
+				line = line.substring(AstUtil.PREFIX.length()).trim();
 			}
 
-			if (line.equals(UNKONW)) {
+			if (line.equals(AstUtil.UNKONW)) {
 				return;
 			}
 
@@ -181,7 +174,7 @@ public class CoverityAstParse {
 
 	public void setMatchingType(String line, CoverityAst definition) throws SdongException {
 		try {
-			line = line.substring(line.indexOf(MATCHING) + MATCHING.length());
+			line = line.substring(line.indexOf(AstUtil.MATCHING) + AstUtil.MATCHING.length());
 			String[] types = line.split(":");
 			DefinitionType type = DefinitionType.get(types[0].trim());
 			definition.setType(type);
@@ -192,52 +185,6 @@ public class CoverityAstParse {
 		}
 	}
 
-	public static Map<Integer, List<String>> splitTUAst(List<String> astContent) throws SdongException {
-		Map<Integer, List<String>> tuList = new HashMap<Integer, List<String>>();
-		List<String> tu = null;
-		int tuNum = 0;
-		int tuStart = 0;
-		int tuEnd = 0;
 
-		try {
-
-			for (String line : astContent) {
-				if (line.startsWith(COMMENT_START)) {
-					if (tu == null) {
-						tu = new ArrayList<String>();
-					} else {
-						if (tuList.containsKey(tuNum)) {
-							tuList.get(tuNum).addAll(tu);
-						} else {
-							tuList.put(tuNum, tu);
-						}
-						tu = new ArrayList<String>();
-					}
-
-				} else if (line.contains(DEFINED_IN_TU)) {
-					tuStart = line.indexOf(DEFINED_IN_TU) + DEFINED_IN_TU.length();
-					tuEnd = line.indexOf(DEFINED_IN_TU_WITH_RON);
-					if (tuEnd == -1) {
-						tuNum = Integer.parseInt(line.substring(tuStart));
-					} else {
-						tuNum = Integer.parseInt(line.substring(tuStart, tuEnd));
-					}
-				}
-				tu.add(line);
-			}
-			if (tu != null) {
-				if (tuList.containsKey(tuNum)) {
-					tuList.get(tuNum).addAll(tu);
-				} else {
-					tuList.put(tuNum, tu);
-				}
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			throw new SdongException(e.getMessage());
-		}
-
-		return tuList;
-	}
 
 }

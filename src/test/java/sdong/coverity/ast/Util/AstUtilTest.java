@@ -5,6 +5,7 @@ import static org.junit.Assert.assertEquals;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.Test;
 
@@ -158,5 +159,22 @@ public class AstUtilTest {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	@Test
+	public void testSplitTUAst() {
+		String fileName = "input/coverityAST/270.271";
+		try {
+			List<String> astContent = FileUtil.readFileToStringList(fileName);
+
+			Map<Integer, List<String>> tuList = AstUtil.splitTUAst(astContent);
+			assertEquals(2, tuList.size());
+			assertEquals(114, tuList.get(270).size());
+			assertEquals(80, tuList.get(271).size());
+		} catch (SdongException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 }
