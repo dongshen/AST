@@ -167,10 +167,10 @@ public class AstUtilTest {
 		try {
 			List<String> astContent = FileUtil.readFileToStringList(fileName);
 
-			Map<Integer, List<String>> tuList = AstUtil.splitTUAst(astContent);
+			Map<String, List<String>> tuList = AstUtil.splitTUAst(astContent);
 			assertEquals(2, tuList.size());
-			assertEquals(114, tuList.get(270).size());
-			assertEquals(80, tuList.get(271).size());
+			assertEquals(114, tuList.get("270").size());
+			assertEquals(80, tuList.get("271").size());
 		} catch (SdongException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

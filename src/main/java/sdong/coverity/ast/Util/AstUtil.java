@@ -15,18 +15,17 @@ import sdong.coverity.ast.CoverityAst;
 public class AstUtil {
 
 	private static final Logger logger = LoggerFactory.getLogger(AstUtil.class);
-	
+
 	public static final String COMMENT_START = "/*";
 	public static final String COMMENT_END = "*/";
 	public static final String DEFINED_IN_TU = " * defined in TU ";
 	private static final String DEFINED_IN_TU_WITH_RON = " with row ";
-	
 
 	public static final String MATCHING = " * Matching ";
 	public static final String DECLARED_AT = " * declared at:";
 	public static final String PREFIX = " *   ";
 	public static final String UNKONW = "<unknown>";
-	
+
 	public static List<String> removeDEFINED_IN_TU(List<String> tuContent) {
 		String line;
 		for (Iterator<String> iter = tuContent.listIterator(); iter.hasNext();) {
@@ -39,10 +38,16 @@ public class AstUtil {
 		return tuContent;
 	}
 
-	public static Map<Integer, List<String>> splitTUAst(List<String> astContent) throws SdongException {
-		Map<Integer, List<String>> tuList = new HashMap<Integer, List<String>>();
+	/**
+	 * split multiple tu export ast by TU number 
+	 * @param astContent
+	 * @return
+	 * @throws SdongException
+	 */
+	public static Map<String, List<String>> splitTUAst(List<String> astContent) throws SdongException {
+		Map<String, List<String>> tuList = new HashMap<String, List<String>>();
 		List<String> tu = null;
-		int tuNum = 0;
+		String tuNum = "";
 		int tuStart = 0;
 		int tuEnd = 0;
 
@@ -65,9 +70,9 @@ public class AstUtil {
 					tuStart = line.indexOf(DEFINED_IN_TU) + DEFINED_IN_TU.length();
 					tuEnd = line.indexOf(DEFINED_IN_TU_WITH_RON);
 					if (tuEnd == -1) {
-						tuNum = Integer.parseInt(line.substring(tuStart));
+						tuNum = line.substring(tuStart);
 					} else {
-						tuNum = Integer.parseInt(line.substring(tuStart, tuEnd));
+						tuNum = line.substring(tuStart, tuEnd);
 					}
 				}
 				tu.add(line);
@@ -86,7 +91,7 @@ public class AstUtil {
 
 		return tuList;
 	}
-	
+
 	public static List<CoverityAst> getGlobleVariableList(List<CoverityAst> functionList) {
 		List<CoverityAst> globalList = new ArrayList<CoverityAst>();
 		for (CoverityAst fun : functionList) {
