@@ -36,6 +36,7 @@ public class CoverityEmitSqliteUtilTest {
 
 	@Test
 	public void testBuildFileListByRecursiveResult() {
+		// id, parentid, component
 		// 1 -1 ""
 		// 2 1 "a"
 		// 3 2 "b"

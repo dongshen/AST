@@ -101,6 +101,7 @@ public class CoverityEmitSqliteUtil {
 	public static Map<Integer, String> buildFileListByRecursiveResult(
 			Map<Integer, List<CoverityEmitFileNameBean>> compList, Map<Integer, String> fileList, int start) {
 		String component = "";
+		String parentComponent = "";
 		List<CoverityEmitFileNameBean> childList;
 		if (compList.containsKey(start)) {
 			childList = compList.get(start);
@@ -109,16 +110,20 @@ public class CoverityEmitSqliteUtil {
 		}
 
 		for (CoverityEmitFileNameBean child : childList) {
+			parentComponent = fileList.get(child.getParent());
+			if (parentComponent == null) {
+				component = child.getComponent();
+			} else {
+				component = parentComponent + "/" + child.getComponent();
+			}
+			fileList.put(child.getFileNameId(), component);
 			// when is parent
 			if (compList.containsKey(child.getFileNameId())) {
-				component = component + "/" + child.getComponent();
-				fileList.put(child.getFileNameId(), component);
 				buildFileListByRecursiveResult(compList, fileList, child.getFileNameId());
-			} else {
-				component = component + "/" + child.getComponent();
-				fileList.put(child.getFileNameId(), component);
 			}
 		}
+		//remove unused node
+		fileList.remove(start);
 
 		return fileList;
 	}
