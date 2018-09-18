@@ -60,17 +60,17 @@ public class CoverityEmitSqliteUtil {
 				}
 
 			}
-			logger.info("compList=" + compList.size());
 			rs.close();
-			conn.close();
+			logger.debug("compList=" + compList.size());
+			
+			buildFileListByRecursiveResult(compList,fileList,-1);			
+
 		} catch (SQLException e) {
 			logger.error(e.getMessage());
 			throw new SdongException(e);
 		} finally {
 			try {
-				if (conn != null) {
-					conn.close();
-				}
+				conn.close();
 			} catch (SQLException e) {
 				logger.error(e.getMessage());
 			}
@@ -122,7 +122,7 @@ public class CoverityEmitSqliteUtil {
 				buildFileListByRecursiveResult(compList, fileList, child.getFileNameId());
 			}
 		}
-		//remove unused node
+		// remove unused node
 		fileList.remove(start);
 
 		return fileList;

@@ -26,7 +26,10 @@ public class CoverityEmitSqliteUtilTest {
 			fileList = CoverityEmitSqliteUtil.getCoverityEmitDBFileList(dbfile);
 
 			logger.info("file num=" + fileList.size());
-			assertEquals(2041, fileList.size());
+			for (Map.Entry<Integer, String> entry : fileList.entrySet()) {
+				logger.info("content id=" + entry.getKey() + " " + entry.getValue());
+			}
+			assertEquals(2014, fileList.size());
 		} catch (SdongException e) {
 			e.printStackTrace();
 			fail("should not get exception");
