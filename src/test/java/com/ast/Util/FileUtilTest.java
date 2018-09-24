@@ -3,10 +3,10 @@ package com.ast.Util;
 import java.io.IOException;
 import java.util.List;
 
-import junit.framework.TestCase;
-
 import org.apache.log4j.Logger;
 import org.junit.Test;
+
+import junit.framework.TestCase;
 
 public class FileUtilTest extends TestCase {
 	static Logger logger = Logger.getLogger(FileUtilTest.class);
