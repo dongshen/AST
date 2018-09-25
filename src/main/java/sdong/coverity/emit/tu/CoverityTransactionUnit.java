@@ -8,7 +8,7 @@ public class CoverityTransactionUnit implements Serializable {
 	 * 
 	 */
 	private static final long serialVersionUID = 7398807250101034421L;
-	
+
 	int id;
 	String primaryFilename;
 	int primaryFileSizeInBytes;
@@ -100,4 +100,21 @@ public class CoverityTransactionUnit implements Serializable {
 		this.isFromBootClassPath = isFromBootClassPath;
 	}
 
+	public enum TuLanguage {
+		JAVA_SOURCE("Java source"), JAVA_BYTECODE("Java bytecode");
+
+		private String languageName;
+
+		TuLanguage(String name) {
+			this.languageName = name;
+		}
+
+		public String getLanguageName() {
+			return languageName;
+		}
+
+		public void setLanguageName(String languageName) {
+			this.languageName = languageName;
+		}
+	}
 }

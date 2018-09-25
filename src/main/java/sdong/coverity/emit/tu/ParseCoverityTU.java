@@ -49,6 +49,8 @@ public class ParseCoverityTU {
 						tu.setHasASTs(reader.nextBoolean());
 					} else if ("isFailure".equals(tag)) {
 						tu.setFailure(reader.nextBoolean());
+					} else if ("isFromBootClassPath".equals(tag)) {
+						tu.setFromBootClassPath(reader.nextBoolean());
 					} else {
 						reader.skipValue();
 					}
@@ -84,12 +86,37 @@ public class ParseCoverityTU {
 		List<CoverityTransactionUnit> tuList = new ArrayList<CoverityTransactionUnit>();
 		CoverityTransactionUnit tu;
 		JSONReader reader = null;
+		String tag;
 		try {
 			reader = new JSONReader(new FileReader(fileName));
 
 			reader.startArray();
 			while (reader.hasNext()) {
-				tu = reader.readObject(CoverityTransactionUnit.class);
+				reader.startObject();
+				tu = new CoverityTransactionUnit();
+				while (reader.hasNext()) {
+					tag = reader.readString();
+					if ("id".equals(tag)) {
+						tu.setId(reader.readInteger());
+					} else if ("primaryFilename".equals(tag)) {
+						tu.setPrimaryFilename(reader.readString());
+					} else if ("language".equals(tag)) {
+						tu.setLanguage(reader.readString());
+					} else if ("userLanguage".equals(tag)) {
+						tu.setUserLanguage(reader.readString());
+					} else if ("hasASTs".equals(tag)) {
+						tu.setHasASTs(Boolean.parseBoolean(reader.readString()));
+					} else if ("isFailure".equals(tag)) {
+						tu.setFailure(Boolean.parseBoolean(reader.readString()));
+					} else if ("isFromBootClassPath".equals(tag)) {
+						tu.setFromBootClassPath(Boolean.parseBoolean(reader.readString()));
+
+					} else {
+						reader.readObject();
+					}
+				}
+				reader.endObject();
+				// tu = reader.readObject(CoverityTransactionUnit.class);
 				tuList.add(tu);
 			}
 			reader.endArray();
@@ -116,33 +143,40 @@ public class ParseCoverityTU {
 			if (jp.nextToken() != JsonToken.START_ARRAY) {
 				throw new SdongException("Expected data to start with an Object");
 			}
-			//jp.nextToken();
-			while (jp.nextToken() != JsonToken.END_ARRAY) {
-				tag = jp.getCurrentName();
-				if ("id".equals(tag)) {
-					if (tu == null) {
-						tu = new CoverityTransactionUnit();
-					} else {
-						tuList.add(tu);
-						tu = new CoverityTransactionUnit();
+			JsonToken nextToken = jp.nextToken();
+			while (nextToken != JsonToken.END_ARRAY) {
+				if (nextToken == JsonToken.START_OBJECT) {
+					tu = new CoverityTransactionUnit();
+					while (jp.nextToken() != JsonToken.END_OBJECT) {
+						tag = jp.getCurrentName();
+						if ("id".equals(tag)) {
+							jp.nextToken();
+							tu.setId(jp.getIntValue());
+						} else if ("primaryFilename".equals(tag)) {
+							jp.nextToken();
+							tu.setPrimaryFilename(jp.getText());
+						} else if ("language".equals(tag)) {
+							jp.nextToken();
+							tu.setLanguage(jp.getText());
+						} else if ("userLanguage".equals(tag)) {
+							jp.nextToken();
+							tu.setUserLanguage(jp.getText());
+						} else if ("hasASTs".equals(tag)) {
+							jp.nextToken();
+							tu.setHasASTs(jp.getBooleanValue());
+						} else if ("isFailure".equals(tag)) {
+							jp.nextToken();
+							tu.setFailure(jp.getBooleanValue());
+						} else if ("isFromBootClassPath".equals(tag)) {
+							jp.nextToken();
+							tu.setFromBootClassPath(jp.getBooleanValue());
+						} else {
+							jp.nextToken();
+						}
 					}
-					tu.setId(jp.getIntValue());
-				} else if ("primaryFilename".equals(tag)) {
-					tu.setPrimaryFilename(jp.getText());
-				} else if ("language".equals(tag)) {
-					tu.setLanguage(jp.getText());
-				} else if ("userLanguage".equals(tag)) {
-					tu.setUserLanguage(jp.getText());
-				} else if ("hasASTs".equals(tag)) {
-					tu.setHasASTs(jp.getBooleanValue());
-				} else if ("isFailure".equals(tag)) {
-					tu.setFailure(jp.getBooleanValue());
-				} else {
-					// jp.skipChildren();
+					tuList.add(tu);
 				}
-			}
-			if (tu != null) {
-				tuList.add(tu);
+				nextToken = jp.nextToken();
 			}
 
 		} catch (JsonParseException e) {

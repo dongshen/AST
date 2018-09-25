@@ -12,6 +12,11 @@ import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
 
+/**
+ * After test Gson is the fastest, Jackson is the second, the last one is fastjson. 
+ * @author shendong
+ *
+ */
 public class ParseCoverityTUTest {
 	private static final Logger logger = LoggerFactory.getLogger(ParseCoverityTUTest.class);
 
