@@ -116,5 +116,15 @@ public class CoverityTransactionUnit implements Serializable {
 		public void setLanguageName(String languageName) {
 			this.languageName = languageName;
 		}
+
+		public static TuLanguage fromLanguageName(String languageName) {
+			for (TuLanguage lang : TuLanguage.values()) {
+				if (lang.getLanguageName().equals(languageName)) {
+					return lang;
+				}
+			}
+			return null;
+		}
+
 	}
 }

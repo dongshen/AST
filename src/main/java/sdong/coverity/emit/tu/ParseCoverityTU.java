@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,15 +23,57 @@ import sdong.common.exception.SdongException;
 public class ParseCoverityTU {
 	private static final Logger logger = LoggerFactory.getLogger(ParseCoverityTU.class);
 
-	public static List<CoverityTransactionUnit> parseCoverityTU_Gson(String fileName) throws SdongException {
-
-		List<CoverityTransactionUnit> tuList = new ArrayList<CoverityTransactionUnit>();
-		CoverityTransactionUnit tu;
-//		Gson gson = new Gson();
-		String tag;
+	public static List<CoverityTransactionUnit> parseCoverityTUByString_Gson(String jsonStr) throws SdongException {
 		JsonReader reader = null;
+		List<CoverityTransactionUnit> tuList = new ArrayList<CoverityTransactionUnit>();
+		if(jsonStr == null || jsonStr.isEmpty()) {
+			return tuList;
+		}
+
+		try {
+			reader = new JsonReader(new StringReader(jsonStr));
+			tuList = parseCoverityTU_Gson(reader);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+					throw new SdongException(e);
+				}
+			}
+		}
+		return tuList;
+	}
+
+	public static List<CoverityTransactionUnit> parseCoverityTUByFile_Gson(String fileName) throws SdongException {
+		JsonReader reader = null;
+		List<CoverityTransactionUnit> tuList = new ArrayList<CoverityTransactionUnit>();
 		try {
 			reader = new JsonReader(new FileReader(fileName));
+			tuList = parseCoverityTU_Gson(reader);
+		} catch (FileNotFoundException e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e);
+		} finally {
+			if (reader != null) {
+				try {
+					reader.close();
+				} catch (IOException e) {
+					logger.error(e.getMessage());
+					throw new SdongException(e);
+				}
+			}
+		}
+		return tuList;
+	}
+
+	private static List<CoverityTransactionUnit> parseCoverityTU_Gson(JsonReader reader) throws SdongException {
+		List<CoverityTransactionUnit> tuList = new ArrayList<CoverityTransactionUnit>();
+		CoverityTransactionUnit tu;
+
+		String tag;
+		try {
 			reader.beginArray();
 			while (reader.hasNext()) {
 				tu = new CoverityTransactionUnit();
@@ -61,23 +104,11 @@ public class ParseCoverityTU {
 			}
 			reader.endArray();
 
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage());
-			throw new SdongException(e);
 		} catch (IOException e) {
 			logger.error(e.getMessage());
 			throw new SdongException(e);
-		} finally {
-			if (reader != null) {
-				try {
-					reader.close();
-				} catch (IOException e) {
-					logger.error(e.getMessage());
-					throw new SdongException(e);
-				}
-			}
 		}
-		// List<Review> data = gson(reader, REVIEW_TYPE);
+
 		return tuList;
 
 	}
