@@ -17,7 +17,7 @@ public class AstUtil {
 	private static final Logger logger = LoggerFactory.getLogger(AstUtil.class);
 
 	public static final String COMMENT_START = "/*";
-	public static final String COMMENT_END = "*/";
+	public static final String COMMENT_END = " */";
 	public static final String DEFINED_IN_TU = " * defined in TU ";
 	private static final String DEFINED_IN_TU_WITH_RON = " with row ";
 
@@ -54,7 +54,7 @@ public class AstUtil {
 		try {
 
 			for (String line : astContent) {
-				if (line.startsWith(COMMENT_START)) {
+				if (line.equals(COMMENT_START)) {
 					if (tu == null) {
 						tu = new ArrayList<String>();
 					} else {

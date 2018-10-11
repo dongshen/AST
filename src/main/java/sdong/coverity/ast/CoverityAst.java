@@ -97,12 +97,14 @@ public class CoverityAst implements Serializable, Comparable<CoverityAst> {
 	}
 
 	public enum DefinitionType {
-		CLASS("class"), FUNCTION("function"), GLOBAL("global");
+		CLASS("class", 1), FUNCTION("function", 2), GLOBAL("global", 3), ENUM("enum", 4);
 
 		private String type;
+		private int index;
 
-		private DefinitionType(String type) {
+		private DefinitionType(String type, int index) {
 			this.type = type;
+			this.index = index;
 		}
 
 		public String getType() {
@@ -111,6 +113,14 @@ public class CoverityAst implements Serializable, Comparable<CoverityAst> {
 
 		public void setType(String type) {
 			this.type = type;
+		}
+
+		public int getIndex() {
+			return index;
+		}
+
+		public void setIndex(int index) {
+			this.index = index;
 		}
 
 		private static final Map<String, DefinitionType> lookup = new HashMap<String, DefinitionType>();
@@ -131,7 +141,7 @@ public class CoverityAst implements Serializable, Comparable<CoverityAst> {
 	public int compareTo(CoverityAst comp) {
 		if (this.getFromLine() > comp.getFromLine()) {
 			return 1;
-		} else if (this.getFromLine() > comp.getFromLine()) {
+		} else if (this.getFromLine() == comp.getFromLine()) {
 			return 0;
 		} else {
 			return -1;

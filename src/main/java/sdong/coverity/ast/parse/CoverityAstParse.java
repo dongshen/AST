@@ -31,7 +31,7 @@ public class CoverityAstParse {
 		try {
 			for (int i = 1; i <= tuContent.size(); i++) {
 				line = tuContent.get(i - 1);
-				if (line.contains(AstUtil.COMMENT_START)) {
+				if (line.equals(AstUtil.COMMENT_START)) {
 					start = true;
 					end = false;
 					// not the first one, need add to list
@@ -52,7 +52,7 @@ public class CoverityAstParse {
 
 				}
 
-				if (line.contains(AstUtil.COMMENT_END) && definition != null) {
+				if (line.equals(AstUtil.COMMENT_END) && definition != null) {
 					end = true;
 					start = false;
 					continue;
