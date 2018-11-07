@@ -19,15 +19,34 @@ public class CoverityEmitSqliteUtilTest {
 	private static final Logger logger = LoggerFactory.getLogger(CoverityEmitSqliteUtilTest.class);
 
 	@Test
-	public void testGetCoverityEmitDBFileList() {
+	public void testGetCoverityEmitDBFileNameList() {
 		String dbfile = "input/coverityEmit/emit/SHENDONG-PC/emit-db";
 		Map<Integer, String> fileList;
 		try {
-			fileList = CoverityEmitSqliteUtil.getCoverityEmitDBFileList(dbfile);
+			fileList = CoverityEmitSqliteUtil.getCoverityEmitDBFileNameList(dbfile);
 
 			logger.info("file num=" + fileList.size());
 			for (Map.Entry<Integer, String> entry : fileList.entrySet()) {
 				logger.info("content id=" + entry.getKey() + " " + entry.getValue());
+			}
+			assertEquals(2016, fileList.size());
+		} catch (SdongException e) {
+			e.printStackTrace();
+			fail("should not get exception");
+		}
+
+	}
+
+	@Test
+	public void testGetCoverityEmitDBFileInfoList() {
+		String dbfile = "input/coverityEmit/emit/SHENDONG-PC/emit-db";
+		List<CoverityEmitFileInfo> fileList;
+		try {
+			fileList = CoverityEmitSqliteUtil.getCoverityEmitDBFileInfoList(dbfile);
+
+			logger.info("file num=" + fileList.size());
+			for (CoverityEmitFileInfo file : fileList) {
+				logger.info(file.toString());
 			}
 			assertEquals(2014, fileList.size());
 		} catch (SdongException e) {
@@ -128,6 +147,23 @@ public class CoverityEmitSqliteUtilTest {
 		assertEquals("/a/b/d", fileList.get(5));
 		assertEquals("/a/c/e", fileList.get(6));
 		assertEquals("/a/c/f/g", fileList.get(8));
+	}
+
+	@Test
+	public void testGetCoverityEmitDBFileEncoding() {
+		String dbfile = "input/coverityEmit/emit/SHENDONG-PC/emit-db";
+
+		try {
+			String encoding = CoverityEmitSqliteUtil.getCoverityEmitDBFileEncoding(dbfile);
+
+			logger.info("encoding=" + encoding);
+
+			assertEquals("GBK", encoding);
+		} catch (SdongException e) {
+			e.printStackTrace();
+			fail("should not get exception");
+		}
+
 	}
 
 }

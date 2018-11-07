@@ -17,7 +17,121 @@ import sdong.common.exception.SdongException;
 
 public class CoverityEmitSqliteUtil {
 	private static final Logger logger = LoggerFactory.getLogger(CoverityEmitSqliteUtil.class);
-	private static final String SQL_COVERITY_FILENAME_LIST = "select FileNameId,parent,component from filename";
+	private static final String SQL_COVERITY_FILENAME_LIST = "select FileNameId,parent,case_preserved_component component from filename order by FileNameId";
+	private static final String SQL_COVERITY_FILE_CONTENT_LIST = "select FileContentsId,filename filenameId,contentSize,blankLines,commentLines,codeLines,inlineCommentLines from FileContents";
+	private static final String SQL_COVERITY_FILE_ENCODING = "select InputFileEncodingId Id,s   from InputFileEncoding";
+	private static final int QUERY_TIMEOUT = 30;
+
+	public static List<CoverityEmitFileInfo> getCoverityEmitDBFileInfoList(String dbfile) throws SdongException {
+		List<CoverityEmitFileInfo> fileInfoList = new ArrayList<CoverityEmitFileInfo>();
+		Connection conn = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		CoverityEmitFileInfo fileInfo;
+		try {
+			Map<Integer, String> fileMap = getCoverityEmitDBFileNameList(dbfile);
+
+			conn = getConnection(dbfile);
+			statement = conn.createStatement();
+			statement.setQueryTimeout(QUERY_TIMEOUT);
+
+			rs = statement.executeQuery(SQL_COVERITY_FILE_CONTENT_LIST);
+			while (rs.next()) {
+				fileInfo = new CoverityEmitFileInfo();
+				fileInfo.setFileContentsId(rs.getInt("FileContentsId"));
+				fileInfo.setFileNameId(rs.getInt("filenameId"));
+				fileInfo.setContentSize(rs.getInt("contentSize"));
+				fileInfo.setBlankLines(rs.getInt("blankLines"));
+				fileInfo.setCommentLines(rs.getInt("commentLines"));
+				fileInfo.setCodeLines(rs.getInt("codeLines"));
+				fileInfo.setInlineCommentLines(rs.getInt("inlineCommentLines"));
+				fileInfo.setFileName(fileMap.get(fileInfo.getFileNameId()));
+				fileInfoList.add(fileInfo);
+			}
+
+		} catch (SQLException e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e);
+		} finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
+		return fileInfoList;
+	}
+
+	public static String getCoverityEmitDBFileEncoding(String dbfile) throws SdongException {
+		String encoding = "";
+		Connection conn = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		try {
+
+			conn = getConnection(dbfile);
+			statement = conn.createStatement();
+			statement.setQueryTimeout(QUERY_TIMEOUT);
+
+			rs = statement.executeQuery(SQL_COVERITY_FILE_ENCODING);
+
+			while (rs.next()) {
+				// rs.getInt("Id");
+				encoding = encoding + rs.getString("s") + ",";
+			}
+
+			if (encoding.length() > 1) {
+				encoding = encoding.substring(0, encoding.length() - 1);
+			}
+
+		} catch (SQLException e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e);
+		} finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
+		return encoding;
+	}
 
 	/**
 	 * get coverity emit file list from emit-db
@@ -27,16 +141,18 @@ public class CoverityEmitSqliteUtil {
 	 *         filenameId
 	 * @throws SdongException
 	 */
-	public static Map<Integer, String> getCoverityEmitDBFileList(String dbfile) throws SdongException {
+	public static Map<Integer, String> getCoverityEmitDBFileNameList(String dbfile) throws SdongException {
 		Map<Integer, String> fileList = new HashMap<Integer, String>();
 		Connection conn = null;
+		Statement statement = null;
+		ResultSet rs = null;
 		try {
 			conn = getConnection(dbfile);
-			Statement statement = conn.createStatement();
-			statement.setQueryTimeout(30); // set timeout to 30 sec.
+			statement = conn.createStatement();
+			statement.setQueryTimeout(QUERY_TIMEOUT);
 			int fileNameId, parent;
 			String component;
-			ResultSet rs = statement.executeQuery(SQL_COVERITY_FILENAME_LIST);
+			rs = statement.executeQuery(SQL_COVERITY_FILENAME_LIST);
 
 			Map<Integer, List<CoverityEmitFileNameBean>> compList = new HashMap<Integer, List<CoverityEmitFileNameBean>>();
 			CoverityEmitFileNameBean bean;
@@ -60,19 +176,37 @@ public class CoverityEmitSqliteUtil {
 				}
 
 			}
-			rs.close();
+
 			logger.debug("compList=" + compList.size());
-			
-			buildFileListByRecursiveResult(compList,fileList,-1);			
+
+			buildFileListByRecursiveResult(compList, fileList, -1);
 
 		} catch (SQLException e) {
 			logger.error(e.getMessage());
 			throw new SdongException(e);
 		} finally {
-			try {
-				conn.close();
-			} catch (SQLException e) {
-				logger.error(e.getMessage());
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
 			}
 		}
 		return fileList;
