@@ -11,7 +11,7 @@ import org.junit.Test;
 
 import sdong.common.exception.SdongException;
 import sdong.common.utils.FileUtil;
-import sdong.coverity.ast.CoverityAst;
+import sdong.coverity.ast.CoverityAstFunction;
 import sdong.coverity.ast.parse.CoverityAstParse;
 
 public class AstUtilTest {
@@ -54,27 +54,27 @@ public class AstUtilTest {
 
 	@Test
 	public void testGetFunctionPerlineNum() {
-		List<CoverityAst> list = new ArrayList<CoverityAst>();
+		List<CoverityAstFunction> list = new ArrayList<CoverityAstFunction>();
 
-		CoverityAst definition = new CoverityAst();
+		CoverityAstFunction definition = new CoverityAstFunction();
 		definition.setFromLine(150);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(100);
 		definition.setFromColumn(1);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(50);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(100);
 		definition.setFromColumn(2);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(0);
 		list.add(definition);
 
@@ -115,9 +115,9 @@ public class AstUtilTest {
 			// get Ast
 			astContent = FileUtil.readFileToStringList(fileName);
 			CoverityAstParse parse = new CoverityAstParse();
-			List<CoverityAst> functionList = parse.parse(astContent);
+			List<CoverityAstFunction> functionList = parse.parse(astContent);
 
-			CoverityAst fun = AstUtil.getFunctionPerlineNum(functionList, lineNum);
+			CoverityAstFunction fun = AstUtil.getFunctionPerlineNum(functionList, lineNum);
 
 			variable = "cookies";
 			String type = AstUtil.getVariableTypeFromDefinition(fun, null, variable);
@@ -147,9 +147,9 @@ public class AstUtilTest {
 			// get Ast
 			astContent = FileUtil.readFileToStringList(fileName);
 			CoverityAstParse parse = new CoverityAstParse();
-			List<CoverityAst> functionList = parse.parse(astContent);
+			List<CoverityAstFunction> functionList = parse.parse(astContent);
 
-			List<CoverityAst> globalList = AstUtil.getGlobleVariableList(functionList);
+			List<CoverityAstFunction> globalList = AstUtil.getGlobleVariableList(functionList);
 
 			assertEquals(1, globalList.size());
 			assertEquals("org.owasp.benchmark.testcode.BenchmarkTest00001.serialVersionUID",

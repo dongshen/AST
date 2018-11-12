@@ -9,8 +9,8 @@ import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
 import sdong.common.utils.StringUtil;
-import sdong.coverity.ast.CoverityAst;
-import sdong.coverity.ast.CoverityAst.DefinitionType;
+import sdong.coverity.ast.CoverityAstFunction;
+import sdong.coverity.ast.CoverityAstFunction.DefinitionType;
 import sdong.coverity.ast.Loc;
 import sdong.coverity.ast.Util.AstUtil;
 
@@ -19,13 +19,13 @@ public class CoverityAstParse {
 	private static final Logger logger = LoggerFactory.getLogger(CoverityAstParse.class);
 
 
-	public List<CoverityAst> parse(List<String> tuContent) throws SdongException {
-		List<CoverityAst> definitionList = new ArrayList<CoverityAst>();
+	public List<CoverityAstFunction> parse(List<String> tuContent) throws SdongException {
+		List<CoverityAstFunction> definitionList = new ArrayList<CoverityAstFunction>();
 		String line;
 		boolean first = true;
 		boolean start = true;
 		boolean end = false;
-		CoverityAst definition = null;
+		CoverityAstFunction definition = null;
 		List<String> content = null;
 
 		try {
@@ -45,7 +45,7 @@ public class CoverityAstParse {
 						first = false;
 					}
 
-					definition = new CoverityAst();
+					definition = new CoverityAstFunction();
 					content = new ArrayList<String>();
 
 					continue;
@@ -110,7 +110,7 @@ public class CoverityAstParse {
 
 	}
 
-	public void setDeclaredAt(String line, CoverityAst definition) throws SdongException {
+	public void setDeclaredAt(String line, CoverityAstFunction definition) throws SdongException {
 		try {
 			if (line.startsWith(AstUtil.PREFIX)) {
 				line = line.substring(AstUtil.PREFIX.length()).trim();
@@ -172,7 +172,7 @@ public class CoverityAstParse {
 		}
 	}
 
-	public void setMatchingType(String line, CoverityAst definition) throws SdongException {
+	public void setMatchingType(String line, CoverityAstFunction definition) throws SdongException {
 		try {
 			line = line.substring(line.indexOf(AstUtil.MATCHING) + AstUtil.MATCHING.length());
 			String[] types = line.split(":");

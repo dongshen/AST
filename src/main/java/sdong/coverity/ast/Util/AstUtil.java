@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
-import sdong.coverity.ast.CoverityAst;
+import sdong.coverity.ast.CoverityAstFunction;
 
 public class AstUtil {
 
@@ -92,10 +92,10 @@ public class AstUtil {
 		return tuList;
 	}
 
-	public static List<CoverityAst> getGlobleVariableList(List<CoverityAst> functionList) {
-		List<CoverityAst> globalList = new ArrayList<CoverityAst>();
-		for (CoverityAst fun : functionList) {
-			if (fun.getType().equals(CoverityAst.DefinitionType.GLOBAL)) {
+	public static List<CoverityAstFunction> getGlobleVariableList(List<CoverityAstFunction> functionList) {
+		List<CoverityAstFunction> globalList = new ArrayList<CoverityAstFunction>();
+		for (CoverityAstFunction fun : functionList) {
+			if (fun.getType().equals(CoverityAstFunction.DefinitionType.GLOBAL)) {
 				globalList.add(fun);
 			}
 		}
@@ -105,10 +105,10 @@ public class AstUtil {
 	/*
 	 * Base on line num to get function
 	 */
-	public static CoverityAst getFunctionPerlineNum(List<CoverityAst> functionList, int lineNum) {
-		CoverityAst fun = null;
+	public static CoverityAstFunction getFunctionPerlineNum(List<CoverityAstFunction> functionList, int lineNum) {
+		CoverityAstFunction fun = null;
 
-		for (CoverityAst function : functionList) {
+		for (CoverityAstFunction function : functionList) {
 			if (function.getFromLine() <= lineNum) {
 				fun = function;
 			} else {
@@ -119,12 +119,12 @@ public class AstUtil {
 		return fun;
 	}
 
-	public static String getVariableTypeFromDefinition(CoverityAst fun, List<CoverityAst> globalList, String variable) {
+	public static String getVariableTypeFromDefinition(CoverityAstFunction fun, List<CoverityAstFunction> globalList, String variable) {
 		String type = null;
 
 		// check global first
 		if (globalList != null) {
-			for (CoverityAst global : globalList) {
+			for (CoverityAstFunction global : globalList) {
 				List<String> contentList = global.getContentForDefinition();
 				for (String content : contentList) {
 					type = getVaribleTypeInLine(content, variable);

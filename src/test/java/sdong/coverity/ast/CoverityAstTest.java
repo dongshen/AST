@@ -8,40 +8,40 @@ import java.util.List;
 
 import org.junit.Test;
 
-import sdong.coverity.ast.CoverityAst.DefinitionType;
+import sdong.coverity.ast.CoverityAstFunction.DefinitionType;
 
 public class CoverityAstTest {
 
 	@Test
 	public void testSetType() {
-		CoverityAst definition = new CoverityAst();
+		CoverityAstFunction definition = new CoverityAstFunction();
 		definition.setType(DefinitionType.CLASS);
 		assertEquals(DefinitionType.CLASS, definition.getType());
 	}
 
 	@Test
 	public void testSort() {
-		List<CoverityAst> list = new ArrayList<CoverityAst>();
+		List<CoverityAstFunction> list = new ArrayList<CoverityAstFunction>();
 
-		CoverityAst definition = new CoverityAst();
+		CoverityAstFunction definition = new CoverityAstFunction();
 		definition.setFromLine(150);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(100);
 		definition.setFromColumn(1);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(50);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(100);
 		definition.setFromColumn(2);
 		list.add(definition);
 
-		definition = new CoverityAst();
+		definition = new CoverityAstFunction();
 		definition.setFromLine(0);
 		list.add(definition);
 

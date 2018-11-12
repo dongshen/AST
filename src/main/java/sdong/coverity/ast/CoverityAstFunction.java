@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class CoverityAst implements Serializable, Comparable<CoverityAst> {
+public class CoverityAstFunction implements Serializable, Comparable<CoverityAstFunction> {
 
 	/**
 	 * 
@@ -13,6 +13,8 @@ public class CoverityAst implements Serializable, Comparable<CoverityAst> {
 	private static final long serialVersionUID = -1122671580213079468L;
 
 	String fileName;
+	String fileNameHash;
+
 	DefinitionType type;
 	String className;
 
@@ -23,6 +25,9 @@ public class CoverityAst implements Serializable, Comparable<CoverityAst> {
 
 	List<String> contentForDefinition;
 	List<String> contentForDebug;
+
+	byte[] compressDefinition;
+	byte[] compressDebug;
 
 	public String getClassName() {
 		return className;
@@ -96,6 +101,30 @@ public class CoverityAst implements Serializable, Comparable<CoverityAst> {
 		this.contentForDebug = contentForDebug;
 	}
 
+	public String getFileNameHash() {
+		return fileNameHash;
+	}
+
+	public void setFileNameHash(String fileNameHash) {
+		this.fileNameHash = fileNameHash;
+	}
+
+	public byte[] getCompressDefinition() {
+		return compressDefinition;
+	}
+
+	public void setCompressDefinition(byte[] compressDefinition) {
+		this.compressDefinition = compressDefinition;
+	}
+
+	public byte[] getCompressDebug() {
+		return compressDebug;
+	}
+
+	public void setCompressDebug(byte[] compressDebug) {
+		this.compressDebug = compressDebug;
+	}
+
 	public enum DefinitionType {
 		CLASS("class", 1), FUNCTION("function", 2), GLOBAL("global", 3), ENUM("enum", 4);
 
@@ -138,7 +167,7 @@ public class CoverityAst implements Serializable, Comparable<CoverityAst> {
 	}
 
 	// sort from small to big
-	public int compareTo(CoverityAst comp) {
+	public int compareTo(CoverityAstFunction comp) {
 		if (this.getFromLine() > comp.getFromLine()) {
 			return 1;
 		} else if (this.getFromLine() == comp.getFromLine()) {
