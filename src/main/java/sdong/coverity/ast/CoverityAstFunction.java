@@ -12,6 +12,11 @@ public class CoverityAstFunction implements Serializable, Comparable<CoverityAst
 	 */
 	private static final long serialVersionUID = -1122671580213079468L;
 
+	String tuNum;
+
+	String astId;
+	String funId;
+
 	String fileName;
 	String fileNameHash;
 
@@ -28,6 +33,22 @@ public class CoverityAstFunction implements Serializable, Comparable<CoverityAst
 
 	byte[] compressDefinition;
 	byte[] compressDebug;
+
+	public String getAstId() {
+		return astId;
+	}
+
+	public void setAstId(String astId) {
+		this.astId = astId;
+	}
+
+	public String getFunId() {
+		return funId;
+	}
+
+	public void setFunId(String funId) {
+		this.funId = funId;
+	}
 
 	public String getClassName() {
 		return className;
@@ -164,6 +185,14 @@ public class CoverityAstFunction implements Serializable, Comparable<CoverityAst
 			return lookup.get(type);
 		}
 
+	}
+
+	public String getTuNum() {
+		return tuNum;
+	}
+
+	public void setTuNum(String tuNum) {
+		this.tuNum = tuNum;
 	}
 
 	// sort from small to big

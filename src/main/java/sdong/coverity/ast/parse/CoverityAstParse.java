@@ -60,9 +60,9 @@ public class CoverityAstParse {
 
 				if (start == true) {
 					if (line.contains(AstUtil.MATCHING)) {
-						setMatchingType(line, definition);
+						AstUtil.setMatchingType(line, definition);
 					} else if (line.contains(AstUtil.DECLARED_AT)) {
-						setDeclaredAt(tuContent.get(i), definition);
+						AstUtil.setDeclaredAt(tuContent.get(i), definition);
 					}
 				}
 
@@ -109,82 +109,5 @@ public class CoverityAstParse {
 		}
 
 	}
-
-	public void setDeclaredAt(String line, CoverityAstFunction definition) throws SdongException {
-		try {
-			if (line.startsWith(AstUtil.PREFIX)) {
-				line = line.substring(AstUtil.PREFIX.length()).trim();
-			}
-
-			if (line.equals(AstUtil.UNKONW)) {
-				return;
-			}
-
-			String[] declared = line.split("-");
-			if (declared.length != 2) {
-				throw new SdongException("wrong split declared at:" + line);
-			}
-
-			String from = declared[0].trim();
-
-			// get col of from
-			int iCol = from.lastIndexOf(":");
-			String strCol = from.substring(iCol + 1);
-			Loc fromLoc = new Loc();
-			fromLoc.setCol(Integer.parseInt(strCol));
-
-			// get ln of from
-			from = from.substring(0, iCol);
-			int iLn = from.lastIndexOf(":");
-			String strLn = from.substring(iLn + 1);
-			fromLoc.setLn(Integer.parseInt(strLn));
-
-			// file of from
-			from = from.substring(0, iLn);
-			fromLoc.setFileName(from);
-
-			String to = declared[1].trim();
-
-			// get col of to
-			iCol = to.lastIndexOf(":");
-			strCol = to.substring(iCol + 1);
-			Loc toLoc = new Loc();
-			toLoc.setCol(Integer.parseInt(strCol));
-
-			// get ln of from
-			to = to.substring(0, iCol);
-			iLn = to.lastIndexOf(":");
-			strLn = to.substring(iLn + 1);
-			toLoc.setLn(Integer.parseInt(strLn));
-
-			// file of to
-			to = to.substring(0, iLn);
-			toLoc.setFileName(to);
-
-			definition.setFileName(fromLoc.getFileName());
-			definition.setFromLine(fromLoc.getLn());
-			definition.setFromColumn(fromLoc.getCol());
-			definition.setToLine(toLoc.getLn());
-			definition.setToColumn(toLoc.getCol());
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			throw new SdongException(e.getMessage());
-		}
-	}
-
-	public void setMatchingType(String line, CoverityAstFunction definition) throws SdongException {
-		try {
-			line = line.substring(line.indexOf(AstUtil.MATCHING) + AstUtil.MATCHING.length());
-			String[] types = line.split(":");
-			DefinitionType type = DefinitionType.get(types[0].trim());
-			definition.setType(type);
-			definition.setClassName(types[1].trim());
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			throw new SdongException(e.getMessage());
-		}
-	}
-
-
 
 }

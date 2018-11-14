@@ -11,13 +11,15 @@ import org.junit.Test;
 
 import sdong.common.exception.SdongException;
 import sdong.common.utils.FileUtil;
+import sdong.common.utils.StringUtil;
+import sdong.common.utils.Util;
 import sdong.coverity.ast.CoverityAstFunction;
 import sdong.coverity.ast.parse.CoverityAstParse;
 
 public class AstUtilTest {
 
 	@Test
-	public void testRemoveDEFINED_IN_TU() {
+	public void testSplitTUAst_for_definition() {
 		String fileName = "input/coverityAST/BenchmarkTest00001_definition";
 		List<String> astContent;
 		try {
@@ -26,8 +28,8 @@ public class AstUtilTest {
 			int total_lines = 114;
 			assertEquals(total_lines, astContent.size());
 
-			List<String> astContent_without_DEFINED_IN_TU = AstUtil.removeDEFINED_IN_TU(astContent);
-			assertEquals(total_lines - 8, astContent_without_DEFINED_IN_TU.size());
+			Map<String, List<String>> tuMap = AstUtil.splitTUAst(astContent);
+			assertEquals(total_lines - 8, tuMap.get("270").size());
 		} catch (SdongException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -35,7 +37,7 @@ public class AstUtilTest {
 	}
 
 	@Test
-	public void testRemoveDEFINED_IN_TU_for_debug() {
+	public void testSplitTUAst_for_debug() {
 		String fileName = "input/coverityAST/BenchmarkTest00001_debug";
 		List<String> astContent;
 		try {
@@ -44,12 +46,67 @@ public class AstUtilTest {
 			int total_lines = 3665;
 			assertEquals(total_lines, astContent.size());
 
-			List<String> astContent_without_DEFINED_IN_TU = AstUtil.removeDEFINED_IN_TU(astContent);
-			assertEquals(total_lines - 4, astContent_without_DEFINED_IN_TU.size());
+			Map<String, List<String>> tuMap = AstUtil.splitTUAst(astContent);
+			assertEquals(total_lines - 4, tuMap.get("270").size());
 		} catch (SdongException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	@Test
+	public void testSplitTUAst() {
+		String fileName = "input/coverityAST/270.271";
+		try {
+			List<String> astContent = FileUtil.readFileToStringList(fileName);
+
+			Map<String, List<String>> tuList = AstUtil.splitTUAst(astContent);
+			assertEquals(2, tuList.size());
+			assertEquals(114 - 8, tuList.get("270").size());
+			assertEquals(80 - 6, tuList.get("271").size());
+		} catch (SdongException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@Test
+	public void testSplitMultipleTuToFunAstList() {
+		String fileName = "input/coverityAST/270.271";
+		try {
+			List<String> astContent = FileUtil.readFileToStringList(fileName);
+
+			Map<String, List<CoverityAstFunction>> tuMap = AstUtil.splitMultipleTuToFunAstList(astContent,
+					AstUtil.AST_TYPE_DEFINITION);
+			assertEquals(2, tuMap.size());
+			assertEquals(6, tuMap.get("270").size());
+			assertEquals(6, tuMap.get("271").size());
+		} catch (SdongException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+	}
+
+	@Test
+	public void testConvertTuToFunAstList() {
+		String fileName = "input/coverityAST/BenchmarkTest00001_definition";
+		String astIdFile = "input/coverityAST/BenchmarkTest00001_definition_update";
+		try {
+			List<String> astContent = FileUtil.readFileToStringList(fileName);
+
+			List<String> astIdList = FileUtil.readFileToStringList(astIdFile);
+			String astId = Util.generateMD5(StringUtil.joinStringListToStringByLineBreak(astIdList));
+
+			List<CoverityAstFunction> funList = AstUtil.convertTuToFunAstList(astContent, AstUtil.AST_TYPE_DEFINITION);
+			assertEquals(6, funList.size());
+			assertEquals(astId, funList.get(0).getAstId());
+		} catch (SdongException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 	}
 
 	@Test
@@ -126,8 +183,8 @@ public class AstUtilTest {
 			variable = "request";
 			type = AstUtil.getVariableTypeFromDefinition(fun, null, variable);
 			assertEquals("javax.servlet.http.HttpServletRequest", type);
-			
-			//global
+
+			// global
 			variable = "org.owasp.benchmark.testcode.BenchmarkTest00001.serialVersionUID";
 			type = AstUtil.getVariableTypeFromDefinition(fun, AstUtil.getGlobleVariableList(functionList), variable);
 			assertEquals("long", type);
@@ -160,21 +217,5 @@ public class AstUtilTest {
 			e.printStackTrace();
 		}
 	}
-	
-	@Test
-	public void testSplitTUAst() {
-		String fileName = "input/coverityAST/270.271";
-		try {
-			List<String> astContent = FileUtil.readFileToStringList(fileName);
 
-			Map<String, List<String>> tuList = AstUtil.splitTUAst(astContent);
-			assertEquals(2, tuList.size());
-			assertEquals(114, tuList.get("270").size());
-			assertEquals(80, tuList.get("271").size());
-		} catch (SdongException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-	}
 }
