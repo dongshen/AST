@@ -69,23 +69,32 @@ public class AstUtil {
 		return tuMap;
 	}
 
-	private static void addAstFunToTuMap(CoverityAstFunction fun, Map<String, List<CoverityAstFunction>> tuMap) {
+	private static String addAstFunToTuMap(CoverityAstFunction fun, Map<String, List<CoverityAstFunction>> tuMap) {
+		String tuNum = null;
 		if (fun == null) {
-			return;
+			return null;
 		}
 
-		String tuNum = fun.getTuNum();
-		if (tuMap.containsKey(tuNum)) {
-			tuMap.get(tuNum).add(fun);
+		tuNum = fun.getTuNum();
+		if (tuNum != null) {
+			if (tuMap.containsKey(tuNum)) {
+				tuMap.get(tuNum).add(fun);
+			} else {
+				List<CoverityAstFunction> tuList = new ArrayList<CoverityAstFunction>();
+				tuList.add(fun);
+				tuMap.put(tuNum, tuList);
+			}
 		} else {
-			List<CoverityAstFunction> tuList = new ArrayList<CoverityAstFunction>();
-			tuList.add(fun);
-			tuMap.put(tuNum, tuList);
+			logger.error("cant get function tuNum!");
 		}
+
+		return tuNum;
 	}
 
 	private static String updateAstFunList(List<CoverityAstFunction> funList) throws SdongException {
 		String astId = null;
+
+		// combine all ast content
 		Iterator<CoverityAstFunction> iter = funList.iterator();
 		CoverityAstFunction fun;
 		List<String> tu = new ArrayList<String>();
@@ -97,6 +106,7 @@ public class AstUtil {
 			}
 		}
 
+		// update ast id;
 		astId = Util.generateMD5(StringUtil.joinStringListToStringByLineBreak(tu));
 
 		for (CoverityAstFunction function : funList) {
@@ -120,11 +130,9 @@ public class AstUtil {
 		try {
 
 			for (String line : astContent) {
-				if (line.equals(COMMENT_START)) {
-					if (tu.size() > 0) {
-						addTuToTuMap(tu, tuMap);
-						tu = new ArrayList<String>();
-					}
+				if (line.equals(COMMENT_START) && tu.size() > 0) {
+					addTuToTuMap(tu, tuMap);
+					tu = new ArrayList<String>();
 				}
 				tu.add(line);
 			}
@@ -139,13 +147,18 @@ public class AstUtil {
 		return tuMap;
 	}
 
-	private static void addTuToTuMap(List<String> tu, Map<String, List<String>> tuMap) {
+	private static String addTuToTuMap(List<String> tu, Map<String, List<String>> tuMap) {
 		String tuNum = getTuNumFromTu(tu);
-		if (tuMap.containsKey(tuNum)) {
-			tuMap.get(tuNum).addAll(tu);
+		if (tuNum != null) {
+			if (tuMap.containsKey(tuNum)) {
+				tuMap.get(tuNum).addAll(tu);
+			} else {
+				tuMap.put(tuNum, tu);
+			}
 		} else {
-			tuMap.put(tuNum, tu);
+			logger.error("cant get tuNum!");
 		}
+		return tuNum;
 	}
 
 	private static CoverityAstFunction convertFunAst(List<String> tu, int astType) throws SdongException {
@@ -196,14 +209,12 @@ public class AstUtil {
 		CoverityAstFunction fun;
 
 		for (String line : astContent) {
-			if (line.equals(COMMENT_START)) {
-				if (tu.size() > 0) {
-					fun = convertFunAst(tu, astType);
-					if (fun != null) {
-						funList.add(fun);
-					}
-					tu = new ArrayList<String>();
+			if (line.equals(COMMENT_START) && tu.size() > 0) {
+				fun = convertFunAst(tu, astType);
+				if (fun != null) {
+					funList.add(fun);
 				}
+				tu = new ArrayList<String>();
 			}
 			tu.add(line);
 		}
