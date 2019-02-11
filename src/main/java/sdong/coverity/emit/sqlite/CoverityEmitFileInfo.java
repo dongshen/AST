@@ -23,6 +23,9 @@ public class CoverityEmitFileInfo implements Serializable {
 	private List<String> sourceCode;
 	private String contents;
 
+	private long contentsHashHi;
+	private long contentsHashLo;
+
 	public int getFileContentsId() {
 		return fileContentsId;
 	}
@@ -109,6 +112,22 @@ public class CoverityEmitFileInfo implements Serializable {
 
 	public void setContents(String contents) {
 		this.contents = contents;
+	}
+
+	public long getContentsHashHi() {
+		return contentsHashHi;
+	}
+
+	public void setContentsHashHi(long contentsHashHi) {
+		this.contentsHashHi = contentsHashHi;
+	}
+
+	public long getContentsHashLo() {
+		return contentsHashLo;
+	}
+
+	public void setContentsHashLo(long contentsHashLo) {
+		this.contentsHashLo = contentsHashLo;
 	}
 
 	@Override

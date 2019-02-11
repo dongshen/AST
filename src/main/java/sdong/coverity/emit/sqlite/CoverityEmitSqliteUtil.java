@@ -1,7 +1,11 @@
 package sdong.coverity.emit.sqlite;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -14,13 +18,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
+import sdong.common.utils.ZlibUtil;
 
 public class CoverityEmitSqliteUtil {
 	private static final Logger logger = LoggerFactory.getLogger(CoverityEmitSqliteUtil.class);
 	private static final String SQL_COVERITY_FILENAME_LIST = "select FileNameId,parent,case_preserved_component component from filename order by FileNameId";
-	private static final String SQL_COVERITY_FILE_CONTENT_LIST = "select FileContentsId,filename filenameId,contentSize,blankLines,commentLines,codeLines,inlineCommentLines from FileContents";
+	private static final String SQL_COVERITY_FILE_CONTENT_LIST = "select FileContentsId,filename filenameId,contentSize,blankLines,commentLines,codeLines,inlineCommentLines,contentsHashHi,contentsHashLo from FileContents";
+	private static final String SQL_COVERITY_FILE_CONTENT = "select contents,contentSize from FileContents where filename = ?";
 	private static final String SQL_COVERITY_FILE_ENCODING = "select InputFileEncodingId Id,s   from InputFileEncoding";
 	private static final int QUERY_TIMEOUT = 30;
+	private static final int BUFFER_SIZE = 1024 * 1024;
 
 	public static List<CoverityEmitFileInfo> getCoverityEmitDBFileInfoList(String dbfile) throws SdongException {
 		List<CoverityEmitFileInfo> fileInfoList = new ArrayList<CoverityEmitFileInfo>();
@@ -46,6 +53,8 @@ public class CoverityEmitSqliteUtil {
 				fileInfo.setCodeLines(rs.getInt("codeLines"));
 				fileInfo.setInlineCommentLines(rs.getInt("inlineCommentLines"));
 				fileInfo.setFileName(fileMap.get(fileInfo.getFileNameId()));
+				fileInfo.setContentsHashHi(rs.getLong("contentsHashHi"));
+				fileInfo.setContentsHashLo(rs.getLong("contentsHashLo"));
 				fileInfoList.add(fileInfo);
 			}
 
@@ -260,5 +269,147 @@ public class CoverityEmitSqliteUtil {
 		fileList.remove(start);
 
 		return fileList;
+	}
+
+	public static String getCoverityEmitDBFileContent(String dbfile, int fileId) throws SdongException {
+		// List<String> contentList = new ArrayList<String>();
+		Connection conn = null;
+		ResultSet rs = null;
+		PreparedStatement pstmt = null;
+		String content = null;
+		byte[] buffer;
+		InputStream input = null;
+		int contentSize;
+		ByteArrayOutputStream outputStream =null;
+
+		try {
+			conn = getConnection(dbfile);
+			pstmt = conn.prepareStatement(SQL_COVERITY_FILE_CONTENT);
+			pstmt.setInt(1, fileId);
+			rs = pstmt.executeQuery();
+			while (rs.next()) {
+				contentSize = rs.getInt("contentSize");
+				outputStream = new ByteArrayOutputStream(contentSize);
+				input = rs.getBinaryStream("contents");
+				buffer = new byte[BUFFER_SIZE];
+				while (input.read(buffer) > 0) {
+					outputStream.write(buffer);
+				}
+				input.close();
+				content = new String(ZlibUtil.decompress(outputStream.toByteArray()));
+			}
+
+			outputStream.close();
+		} catch (SQLException e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e);
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
+		return content;
+	}
+
+	public static String getEmitBlobContent(String dbfile, String sql) throws SdongException {
+		String result = null;
+		Connection conn = null;
+		Statement statement = null;
+		ResultSet rs = null;
+		byte[] buffer = null;
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		InputStream input = null;
+
+		try {
+			conn = getConnection(dbfile);
+			statement = conn.createStatement();
+			statement.setQueryTimeout(QUERY_TIMEOUT);
+			rs = statement.executeQuery(sql);
+			while (rs.next()) {
+				input = rs.getBinaryStream("content");
+				buffer = new byte[BUFFER_SIZE];
+				while (input.read(buffer) > 0) {
+					outputStream.write(buffer);
+				}
+
+				input.close();
+				//result =  new String(ZlibUtil.decompress(outputStream.toByteArray()));
+				result =  new String(ZlibUtil.decompress(ZlibUtil.subBytes(outputStream.toByteArray(),0)));
+				//result = ZlibUtil.unzip(ZlibUtil.subBytes(outputStream.toByteArray(),0));
+				//result = ZlibUtil.unzip(outputStream.toByteArray());
+				break;
+			}
+
+		} catch (SQLException e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e);
+		} catch (IOException e) {
+			logger.error(e.getMessage());
+			throw new SdongException(e);
+		} finally {
+			if (statement != null) {
+				try {
+					statement.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (outputStream != null) {
+				try {
+					outputStream.close();
+				} catch (IOException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+
+			if (conn != null) {
+				try {
+					conn.close();
+				} catch (SQLException e) {
+					logger.error(e.getMessage(), e);
+				}
+			}
+		}
+
+		return result;
 	}
 }

@@ -13,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import sdong.common.exception.SdongException;
+import sdong.common.utils.StringUtil;
 
 public class CoverityEmitSqliteUtilTest {
 
@@ -166,4 +167,48 @@ public class CoverityEmitSqliteUtilTest {
 
 	}
 
+	@Test
+	public void testGetCoverityEmitDBFileContent() {
+		String dbfile = "input/coverityEmit/emit/SHENDONG-PC/emit-db";
+		int fileId = 12;
+		try {
+
+			String content = CoverityEmitSqliteUtil.getCoverityEmitDBFileContent(dbfile, fileId);
+			List<String> list = StringUtil.splitStringToListByLineBreak(content);
+			logger.info("size=" + list.size());
+			for (String line : list) {
+				logger.info(line);
+			}
+
+			assertEquals(64, list.size());
+			assertEquals("public abstract class AbstractTestCase extends AbstractTestCaseBase ", list.get(9));
+		} catch (SdongException e) {
+			e.printStackTrace();
+			fail("should not get exception");
+		}
+
+	}
+
+	@Test
+	public void testGetEmitBlobContent() {
+		String dbfile = "input/coverityEmit/emit/SHENDONG-PC/emit-db";
+		//String sql = "select contents content from FileContents where filename =12";
+		//String sql = "select inputFiles content from ClassPathFiles where classpathfilesId=1";
+		//String sql = "select info content from definedclassinfo where definedclassinfoId=3";
+		//String sql = "select info content from xrefs where xrefsId=13";
+		String sql = "select workerinfo content from definedfunctionInfo where rowId=1";
+		
+
+		try {
+			String content = CoverityEmitSqliteUtil.getEmitBlobContent(dbfile, sql);
+
+			logger.info("content=" + content);
+
+			// assertEquals("GBK", content);
+		} catch (SdongException e) {
+			e.printStackTrace();
+			fail("should not get exception");
+		}
+
+	}
 }
